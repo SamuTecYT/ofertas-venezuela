@@ -1,0 +1,20 @@
+User-agent: *
+Allow: /
+
+# AI Crawlers for Generative Engine Optimization (GEO)
+User-agent: GPTBot
+Allow: /
+
+User-agent: PerplexityBot
+Allow: /
+
+User-agent: ClaudeBot
+Allow: /
+
+User-agent: Google-Extended
+Allow: /
+
+User-agent: Applebot-Extended
+Allow: /
+
+Sitemap: https://samutecyt.github.io/ofertas-venezuela/sitemap.xml
