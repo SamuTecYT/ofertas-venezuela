@@ -1,20 +1,5 @@
 User-agent: *
 Allow: /
-
-# Rastreadores de IA permitidos (GEO)
-User-agent: GPTBot
-Allow: /
-
-User-agent: PerplexityBot
-Allow: /
-
-User-agent: ClaudeBot
-Allow: /
-
-User-agent: Google-Extended
-Allow: /
-
-User-agent: Applebot-Extended
-Allow: /
+Disallow: /*/account/
 
 Sitemap: https://samutecyt.github.io/ofertas-venezuela/sitemap.xml
