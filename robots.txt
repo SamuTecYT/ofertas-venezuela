@@ -1,7 +1,7 @@
 User-agent: *
 Allow: /
 
-# AI Crawlers for Generative Engine Optimization (GEO)
+# Rastreadores de IA permitidos (GEO)
 User-agent: GPTBot
 Allow: /
 
