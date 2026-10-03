@@ -91,6 +91,62 @@
     if (none) none.hidden = visible.length > 0 || !cards.length;
   }
 
+
+  // Mini-bot de búsqueda con IA (API en Cloudflare Workers). Todo se pinta con textContent: sin HTML inyectado.
+  var askForm = $("#ask-form"), out = $("#ask-out");
+  if (askForm && out && out.dataset.api) {
+    var D = out.dataset;
+    var okUrl = function (u) { try { return new URL(u).protocol === "https:"; } catch (e) { return false; } };
+    var el = function (tag, cls, text) { var n = document.createElement(tag); if (cls) n.className = cls; if (text) n.textContent = text; return n; };
+    var show = function (nodes) { out.textContent = ""; nodes.forEach(function (n) { out.appendChild(n); }); };
+    askForm.addEventListener("submit", function (ev) {
+      ev.preventDefault();
+      var qv = $("#ask-q").value.trim();
+      if (qv.length < 2) return;
+      var btn = askForm.querySelector("button");
+      btn.disabled = true;
+      show([el("p", "meta", D.wait)]);
+      fetch(D.api + "/ask", {
+        method: "POST", headers: { "content-type": "application/json" },
+        body: JSON.stringify({ q: qv, lang: body.dataset.lang }), credentials: "omit", referrerPolicy: "no-referrer"
+      }).then(function (r) {
+        if (r.status === 429) throw new Error("limit");
+        if (!r.ok) throw new Error("err");
+        return r.json();
+      }).then(function (d) {
+        var nodes = [];
+        if (d.kind === "travel" || d.kind === "unclear") {
+          var a = el("a", "btn", "✈️ Telegram"); a.href = D.bot; a.target = "_blank"; a.rel = "noopener noreferrer";
+          nodes.push(el("p", "", D.travel), a);
+          return show(nodes);
+        }
+        if (d.name) nodes.push(el("h3", "", d.name));
+        nodes.push(el("h4", "", D.links));
+        var ul = el("div", "asklinks");
+        (d.links || []).forEach(function (l) {
+          if (!okUrl(l.url)) return;
+          var a = el("a", "btn ghost", "🔎 " + l.store); a.href = l.url; a.target = "_blank"; a.rel = "sponsored nofollow noopener noreferrer"; ul.appendChild(a);
+        });
+        nodes.push(ul, el("p", "meta", D.note));
+        nodes.push(el("h4", "", D.offers));
+        if (d.offers && d.offers.length) {
+          var g = el("div", "asklist");
+          d.offers.forEach(function (o) {
+            if (!okUrl(o.url)) return;
+            var row = el("a", "askrow"); row.href = o.url; row.target = "_blank"; row.rel = "sponsored nofollow noopener noreferrer";
+            row.appendChild(el("b", "", o.title));
+            row.appendChild(el("span", "", o.store + " · " + o.price + " " + o.currency + (o.discount ? " · -" + o.discount + "%" : "")));
+            g.appendChild(row);
+          });
+          nodes.push(g);
+        } else { nodes.push(el("p", "meta", D.empty)); }
+        show(nodes);
+      }).catch(function (e) {
+        show([el("p", "meta", e && e.message === "limit" ? D.limit : D.err)]);
+      }).then(function () { btn.disabled = false; });
+    });
+  }
+
   // Buscadores de cabecera/portada -> página de búsqueda
   var root = body.dataset.root, lang = body.dataset.lang;
   ["#q-top", "#q-hero"].forEach(function (id) {
